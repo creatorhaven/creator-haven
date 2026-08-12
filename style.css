@@ -180,3 +180,261 @@ footer {
         padding: 0 15px;
     }
 }
+/* ========================================
+   NAVIGATION
+   ======================================== */
+
+.navbar {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 22px 25px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.nav-links {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-links a {
+    color: #aaaabd;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+    color: #ffffff;
+}
+
+
+/* ========================================
+   TOOLS SECTION
+   ======================================== */
+
+.tools-section {
+    max-width: 1100px;
+    margin: 0 auto 90px;
+    padding: 0 25px;
+}
+
+.section-heading {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.section-heading h2 {
+    font-size: 2.2rem;
+    margin-bottom: 8px;
+}
+
+.section-heading p {
+    color: #9999ad;
+}
+
+
+/* ========================================
+   TOOL GRID
+   ======================================== */
+
+.tool-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 22px;
+}
+
+
+/* ========================================
+   TOOL CARDS
+   ======================================== */
+
+.tool-card {
+    padding: 30px;
+
+    background: #12121f;
+
+    border: 1px solid #29293d;
+
+    border-radius: 20px;
+
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.tool-card:hover {
+    transform: translateY(-6px);
+
+    border-color: #6d5bd0;
+
+    box-shadow:
+        0 15px 40px
+        rgba(80, 70, 180, 0.18);
+}
+
+.tool-icon {
+    font-size: 2.2rem;
+    margin-bottom: 18px;
+}
+
+.tool-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+}
+
+.tool-card p {
+    color: #a8a8ba;
+    margin-bottom: 22px;
+}
+
+
+/* ========================================
+   TOOL BUTTON
+   ======================================== */
+
+.tool-button {
+    border: none;
+
+    padding: 11px 18px;
+
+    border-radius: 10px;
+
+    font-size: 0.9rem;
+
+    font-weight: bold;
+
+    color: white;
+
+    cursor: pointer;
+
+    background: linear-gradient(
+        90deg,
+        #8b5cf6,
+        #3b82f6
+    );
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.tool-button:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px
+        rgba(91, 78, 220, 0.35);
+}
+
+
+/* ========================================
+   PROMPT SECTION
+   ======================================== */
+
+.prompt-section {
+    max-width: 850px;
+
+    margin: 0 auto 80px;
+
+    padding: 55px 30px;
+
+    text-align: center;
+
+    border-radius: 25px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #17152b,
+            #101525
+        );
+
+    border: 1px solid #292750;
+}
+
+.prompt-section h2 {
+    font-size: 2rem;
+
+    margin-bottom: 12px;
+}
+
+.prompt-section p {
+    color: #aaaabd;
+
+    max-width: 600px;
+
+    margin: 0 auto 25px;
+}
+
+
+/* ========================================
+   ABOUT SECTION
+   ======================================== */
+
+.about-section {
+    max-width: 750px;
+
+    margin: 0 auto 80px;
+
+    padding: 0 25px;
+
+    text-align: center;
+}
+
+.about-section h2 {
+    font-size: 2rem;
+
+    margin-bottom: 15px;
+}
+
+.about-section p {
+    color: #9999ad;
+}
+
+
+/* ========================================
+   MOBILE TOOLS
+   ======================================== */
+
+@media (max-width: 800px) {
+
+    .tool-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .navbar {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+}
+
+
+@media (max-width: 500px) {
+
+    .nav-links {
+        gap: 15px;
+
+        font-size: 0.9rem;
+    }
+
+    .tools-section {
+        padding: 0 15px;
+    }
+
+    .tool-card {
+        padding: 25px;
+    }
+
+}
