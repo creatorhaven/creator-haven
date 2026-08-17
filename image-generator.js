@@ -3,6 +3,8 @@
 // ======================================
 
 const promptBox = document.getElementById("prompt");
+const sizeSelect = document.getElementById("size");
+const styleSelect = document.getElementById("style");
 const generateButton = document.getElementById("generateButton");
 const resultArea = document.getElementById("resultArea");
 
@@ -14,6 +16,8 @@ const resultArea = document.getElementById("resultArea");
 generateButton.addEventListener("click", function () {
 
     const prompt = promptBox.value.trim();
+    const size = sizeSelect.value;
+    const style = styleSelect.value;
 
     // Check if prompt is empty
     if (!prompt) {
@@ -46,7 +50,8 @@ generateButton.addEventListener("click", function () {
 
     generateButton.disabled = true;
 
-    generateButton.textContent = "⏳ Preparing your creation...";
+    generateButton.textContent =
+        "⏳ Preparing your creation...";
 
 
     resultArea.innerHTML = `
@@ -57,17 +62,30 @@ generateButton.addEventListener("click", function () {
             </div>
 
             <h2>
-                Your idea is ready!
+                Preparing your image
             </h2>
 
             <p>
-                We're preparing the AI image generator.
-                The real AI generation engine will be connected here next.
+                Your image settings have been received.
             </p>
 
             <p>
-                <strong>Your prompt:</strong><br>
+                <strong>Prompt:</strong><br>
                 ${escapeHTML(prompt)}
+            </p>
+
+            <p>
+                <strong>Size:</strong>
+                ${escapeHTML(size)}
+            </p>
+
+            <p>
+                <strong>Style:</strong>
+                ${escapeHTML(style)}
+            </p>
+
+            <p>
+                🔧 AI image generation engine will be connected next.
             </p>
 
         </div>
@@ -80,7 +98,8 @@ generateButton.addEventListener("click", function () {
 
         generateButton.disabled = false;
 
-        generateButton.textContent = "✨ Generate Image";
+        generateButton.textContent =
+            "✨ Generate Image";
 
     }, 1500);
 
@@ -101,11 +120,9 @@ inspirationButtons.forEach(function (button) {
 
         const text = button.textContent;
 
-        // Remove emoji from beginning
-        const cleanText = text.replace(
-            /^[^\w]+/u,
-            ""
-        ).trim();
+        const cleanText = text
+            .replace(/^[^\w]+/u, "")
+            .trim();
 
         promptBox.value = cleanText;
 
