@@ -1,5 +1,5 @@
 // ======================================
-// CREATOR HAVEN - IMAGE GENERATOR
+// CREATOR HAVEN - AI IMAGE GENERATOR
 // ======================================
 
 const promptBox = document.getElementById("prompt");
@@ -8,18 +8,23 @@ const styleSelect = document.getElementById("style");
 const generateButton = document.getElementById("generateButton");
 const resultArea = document.getElementById("resultArea");
 
+const API_URL =
+    "https://creator-haven-api.smhealinghub.workers.dev/";
+
 
 // ======================================
-// GENERATE BUTTON
+// GENERATE IMAGE
 // ======================================
 
-generateButton.addEventListener("click", function () {
+generateButton.addEventListener("click", async function () {
 
     const prompt = promptBox.value.trim();
     const size = sizeSelect.value;
     const style = styleSelect.value;
 
-    // Check if prompt is empty
+
+    // Check prompt
+
     if (!prompt) {
 
         resultArea.innerHTML = `
@@ -46,62 +51,153 @@ generateButton.addEventListener("click", function () {
     }
 
 
-    // Show generating state
+    // Disable button
 
     generateButton.disabled = true;
 
     generateButton.textContent =
-        "⏳ Preparing your creation...";
+        "⏳ Creating your image...";
 
 
     resultArea.innerHTML = `
         <div class="result-placeholder">
 
             <div class="result-icon">
-                ✨
+                🎨
             </div>
 
             <h2>
-                Preparing your image
+                Creating your image...
             </h2>
 
             <p>
-                Your image settings have been received.
-            </p>
-
-            <p>
-                <strong>Prompt:</strong><br>
-                ${escapeHTML(prompt)}
-            </p>
-
-            <p>
-                <strong>Size:</strong>
-                ${escapeHTML(size)}
-            </p>
-
-            <p>
-                <strong>Style:</strong>
-                ${escapeHTML(style)}
-            </p>
-
-            <p>
-                🔧 AI image generation engine will be connected next.
+                Please give Creator Haven a moment.
             </p>
 
         </div>
     `;
 
 
-    // Reset button
+    try {
 
-    setTimeout(function () {
+        // Add style to prompt
 
-        generateButton.disabled = false;
+        const finalPrompt =
+            `${prompt}. Style: ${style}.`;
 
-        generateButton.textContent =
-            "✨ Generate Image";
 
-    }, 1500);
+        // Send request to Cloudflare Worker
+
+        const response = await fetch(API_URL, {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+                prompt: finalPrompt,
+
+                size: size
+
+            })
+
+        });
+
+
+        const data = await response.json();
+
+
+        // Check for API error
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.error ||
+                "Image generation failed."
+            );
+
+        }
+
+
+        // Display generated image
+
+        resultArea.innerHTML = `
+
+            <div class="generated-result">
+
+                <img
+                    src="data:image/png;base64,${data.image}"
+                    alt="${escapeHTML(prompt)}"
+                    class="generated-image"
+                >
+
+                <div class="result-actions">
+
+                    <a
+                        href="data:image/png;base64,${data.image}"
+                        download="creator-haven-image.png"
+                        class="download-button"
+                    >
+                        ⬇️ Download Image
+                    </a>
+
+                    <button
+                        class="create-again-button"
+                        onclick="window.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        })"
+                    >
+                        ✨ Create Another
+                    </button>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        resultArea.innerHTML = `
+
+            <div class="result-placeholder">
+
+                <div class="result-icon">
+                    ⚠️
+                </div>
+
+                <h2>
+                    Something went wrong
+                </h2>
+
+                <p>
+                    We couldn't create your image this time.
+                </p>
+
+                <p>
+                    Please try again in a moment.
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    // Enable button again
+
+    generateButton.disabled = false;
+
+    generateButton.textContent =
+        "✨ Generate Image";
 
 });
 
@@ -139,7 +235,8 @@ inspirationButtons.forEach(function (button) {
 
 function escapeHTML(text) {
 
-    const div = document.createElement("div");
+    const div =
+        document.createElement("div");
 
     div.textContent = text;
 
