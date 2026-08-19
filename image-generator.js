@@ -96,15 +96,15 @@ generateButton.addEventListener("click", async function () {
                 "Content-Type": "application/json"
             },
 
-            body: JSON.stringify({
+           body: JSON.stringify({
 
-                prompt: finalPrompt,
+    prompt: prompt,
 
-                size: size
+    size: size,
 
-            })
+    style: style
 
-        });
+})
 
 
         const data = await response.json();
