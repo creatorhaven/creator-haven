@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <meta name="description"
+          content="Creator Haven free AI video generator">
+
+    <title>AI Video Generator - Creator Haven</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+    <!-- NAVIGATION -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            ✦ Creator Haven
+        </div>
+
+        <div class="nav-links">
+
+            <a href="index.html">
+                Home
+            </a>
+
+            <a href="index.html#tools">
+                Tools
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- VIDEO GENERATOR -->
+
+    <main class="generator-page">
+
+        <div class="generator-header">
+
+            <div class="generator-icon">
+                🎬
+            </div>
+
+            <h1>
+                AI Video Generator
+            </h1>
+
+            <p>
+                Turn your ideas into beautiful short videos.
+                Describe the scene you imagine.
+            </p>
+
+        </div>
+
+
+        <!-- GENERATOR BOX -->
+
+        <section class="generator-box">
+
+            <label for="videoPrompt">
+                Describe your video
+            </label>
+
+            <textarea
+                id="videoPrompt"
+                placeholder="Example: A peaceful mountain lake at sunrise, gentle mist floating over the water, cinematic camera movement..."
+                rows="6">
+            </textarea>
+
+
+            <!-- OPTIONS -->
+
+            <div class="generator-options">
+
+
+                <!-- FORMAT -->
+
+                <div class="option-group">
+
+                    <label for="videoSize">
+                        Video format
+                    </label>
+
+                    <select id="videoSize">
+
+                        <option value="landscape">
+                            Landscape · 16:9
+                        </option>
+
+                        <option value="portrait">
+                            Portrait · 9:16
+                        </option>
+
+                        <option value="square">
+                            Square · 1:1
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- DURATION -->
+
+                <div class="option-group">
+
+                    <label for="duration">
+                        Duration
+                    </label>
+
+                    <select id="duration">
+
+                        <option value="5">
+                            5 seconds
+                        </option>
+
+                        <option value="10">
+                            10 seconds
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- STYLE -->
+
+                <div class="option-group">
+
+                    <label for="videoStyle">
+                        Style
+                    </label>
+
+                    <select id="videoStyle">
+
+                        <option value="cinematic">
+                            Cinematic
+                        </option>
+
+                        <option value="realistic">
+                            Realistic
+                        </option>
+
+                        <option value="dreamy">
+                            Dreamy
+                        </option>
+
+                        <option value="digital-art">
+                            Digital Art
+                        </option>
+
+                        <option value="anime">
+                            Anime
+                        </option>
+
+                        <option value="minimal">
+                            Minimal
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- GENERATE BUTTON -->
+
+            <button
+                class="generate-button"
+                id="generateVideoButton">
+
+                🎬 Generate Video
+
+            </button>
+
+
+            <p class="generator-note">
+                Free creative tool · Video generation engine coming soon
+            </p>
+
+        </section>
+
+
+        <!-- RESULT AREA -->
+
+        <section
+            class="result-area"
+            id="videoResultArea">
+
+            <div class="result-placeholder">
+
+                <div class="result-icon">
+                    🎬
+                </div>
+
+                <h2>
+                    Your video will appear here
+                </h2>
+
+                <p>
+                    Describe your idea and click
+                    Generate Video.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- VIDEO INSPIRATION -->
+
+        <section class="prompt-tips">
+
+            <h2>
+                💡 Need inspiration?
+            </h2>
+
+            <div class="tip-grid">
+
+                <button>
+                    🌅 Cinematic sunrise over a peaceful mountain lake
+                </button>
+
+                <button>
+                    🌌 Dreamy cosmic meditation journey through the stars
+                </button>
+
+                <button>
+                    🌸 Flowers gently moving in a warm summer breeze
+                </button>
+
+                <button>
+                    ✨ Magical golden light surrounding a peaceful person
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <p>
+            © 2026 Creator Haven · Free creative tools for everyone.
+        </p>
+
+    </footer>
+
+
+</body>
+
+</html>
