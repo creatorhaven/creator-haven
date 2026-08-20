@@ -88,26 +88,23 @@ generateButton.addEventListener("click", async function () {
 
         // Send request to Cloudflare Worker
 
-        const response = await fetch(API_URL, {
+const response = await fetch(API_URL, {
 
-            method: "POST",
+    method: "POST",
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+    headers: {
+        "Content-Type": "application/json"
+    },
 
-           body: JSON.stringify({
+    body: JSON.stringify({
+        prompt: prompt,
+        size: size,
+        style: style
+    })
 
-    prompt: prompt,
+});
 
-    size: size,
-
-    style: style
-
-})
-
-
-        const data = await response.json();
+const data = await response.json();
 
 
         // Check for API error
