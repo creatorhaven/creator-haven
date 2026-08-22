@@ -2,26 +2,24 @@
 // CREATOR HAVEN - VIDEO GENERATOR
 // ======================================
 
-const API_URL =
-    "https://creator-haven-api.smhealinghub.workers.dev/";
-
-const videoPrompt =
-    document.getElementById("videoPrompt");
-
-const videoSize =
-    document.getElementById("videoSize");
-
-const duration =
-    document.getElementById("duration");
-
-const videoStyle =
-    document.getElementById("videoStyle");
+const videoPrompt = document.getElementById("videoPrompt");
+const videoSize = document.getElementById("videoSize");
+const duration = document.getElementById("duration");
+const videoStyle = document.getElementById("videoStyle");
 
 const generateVideoButton =
     document.getElementById("generateVideoButton");
 
 const videoResultArea =
     document.getElementById("videoResultArea");
+
+
+// ======================================
+// CLOUDFLARE VIDEO API
+// ======================================
+
+const VIDEO_API =
+    "https://creator-haven-api.smhealinghub.workers.dev/";
 
 
 // ======================================
@@ -32,13 +30,11 @@ generateVideoButton.addEventListener("click", async function () {
 
     const prompt = videoPrompt.value.trim();
     const size = videoSize.value;
-    const videoDuration = Number(duration.value);
+    const videoDuration = duration.value;
     const style = videoStyle.value;
 
 
-    // ======================================
-    // CHECK PROMPT
-    // ======================================
+    // Check prompt
 
     if (!prompt) {
 
@@ -66,14 +62,13 @@ generateVideoButton.addEventListener("click", async function () {
     }
 
 
-    // ======================================
-    // LOADING STATE
-    // ======================================
+    // Loading state
 
     generateVideoButton.disabled = true;
 
     generateVideoButton.textContent =
-        "⏳ Creating your video...";
+        "⏳ Generating your video...";
+
 
     videoResultArea.innerHTML = `
         <div class="result-placeholder">
@@ -91,21 +86,15 @@ generateVideoButton.addEventListener("click", async function () {
                 Please keep this page open.
             </p>
 
-            <p>
-                ✨ Your video is being generated with AI.
-            </p>
-
         </div>
     `;
 
 
     try {
 
-        // ======================================
-        // SEND REQUEST TO CLOUDFLARE
-        // ======================================
+        // Send request to Cloudflare Worker
 
-        const response = await fetch(API_URL, {
+        const response = await fetch(VIDEO_API, {
 
             method: "POST",
 
@@ -115,13 +104,11 @@ generateVideoButton.addEventListener("click", async function () {
 
             body: JSON.stringify({
 
-                type: "video",
-
                 prompt: prompt,
 
                 size: size,
 
-                duration: videoDuration,
+                duration: Number(videoDuration),
 
                 style: style
 
@@ -130,42 +117,22 @@ generateVideoButton.addEventListener("click", async function () {
         });
 
 
-        // ======================================
-        // READ RESPONSE
-        // ======================================
-
         const data = await response.json();
 
 
-        // ======================================
-        // CHECK ERROR
-        // ======================================
+        // Check for API error
 
         if (!response.ok || !data.success) {
 
             throw new Error(
-                data.error ||
-                "Video generation failed."
+                data.error || "Video generation failed."
             );
 
         }
 
 
         // ======================================
-        // CHECK VIDEO URL
-        // ======================================
-
-        if (!data.video) {
-
-            throw new Error(
-                "The video was generated but no video URL was returned."
-            );
-
-        }
-
-
-        // ======================================
-        // SHOW VIDEO
+        // DISPLAY VIDEO
         // ======================================
 
         videoResultArea.innerHTML = `
@@ -180,85 +147,41 @@ generateVideoButton.addEventListener("click", async function () {
                     Your video is ready!
                 </h2>
 
-                <p>
-                    ${escapeHTML(prompt)}
-                </p>
-
                 <video
                     controls
+                    autoplay
+                    loop
                     playsinline
                     style="
                         width: 100%;
                         max-width: 800px;
-                        margin-top: 25px;
                         border-radius: 16px;
-                        display: block;
-                        margin-left: auto;
-                        margin-right: auto;
+                        margin-top: 20px;
                     "
-                >
-
-                    <source
-                        src="${escapeHTML(data.video)}"
-                        type="video/mp4"
-                    >
-
-                    Your browser does not support video playback.
-
+                    src="${data.video}">
                 </video>
 
+                <br><br>
 
-                <div style="margin-top: 25px;">
-
-                    <a
-                        href="${escapeHTML(data.video)}"
-                        target="_blank"
-                        rel="noopener"
-                        class="tool-button"
-                        style="
-                            display: inline-block;
-                            text-decoration: none;
-                        "
-                    >
-                        ⬇️ Open / Download Video
-                    </a>
-
-                </div>
-
-
-                <p style="margin-top: 20px;">
-
-                    <strong>Format:</strong>
-                    ${escapeHTML(size)}
-
-                    <br>
-
-                    <strong>Duration:</strong>
-                    ${videoDuration} seconds
-
-                    <br>
-
-                    <strong>Style:</strong>
-                    ${escapeHTML(style)}
-
-                </p>
+                <a
+                    href="${data.video}"
+                    download
+                    target="_blank"
+                    class="tool-button">
+                    ⬇️ Download Video
+                </a>
 
             </div>
 
         `;
 
-
-    } catch (error) {
-
-        console.error(
-            "Video generation error:",
-            error
-        );
+    }
 
 
-        // ======================================
-        // ERROR MESSAGE
-        // ======================================
+    catch (error) {
+
+        console.error("Video generation error:", error);
+
 
         videoResultArea.innerHTML = `
 
@@ -273,14 +196,7 @@ generateVideoButton.addEventListener("click", async function () {
                 </h2>
 
                 <p>
-                    ${escapeHTML(
-                        error.message ||
-                        "Something went wrong."
-                    )}
-                </p>
-
-                <p>
-                    Please try again in a moment.
+                    ${escapeHTML(error.message)}
                 </p>
 
             </div>
@@ -290,9 +206,7 @@ generateVideoButton.addEventListener("click", async function () {
     }
 
 
-    // ======================================
-    // RESET BUTTON
-    // ======================================
+    // Reset button
 
     generateVideoButton.disabled = false;
 
@@ -307,32 +221,24 @@ generateVideoButton.addEventListener("click", async function () {
 // ======================================
 
 const inspirationButtons =
-    document.querySelectorAll(
-        ".tip-grid button"
-    );
+    document.querySelectorAll(".tip-grid button");
 
 
 inspirationButtons.forEach(function (button) {
 
-    button.addEventListener(
-        "click",
-        function () {
+    button.addEventListener("click", function () {
 
-            const text =
-                button.textContent;
+        const text = button.textContent;
 
-            const cleanText =
-                text
-                    .replace(/^[^\w]+/u, "")
-                    .trim();
+        const cleanText = text
+            .replace(/^[^\w]+/u, "")
+            .trim();
 
-            videoPrompt.value =
-                cleanText;
+        videoPrompt.value = cleanText;
 
-            videoPrompt.focus();
+        videoPrompt.focus();
 
-        }
-    );
+    });
 
 });
 
@@ -346,8 +252,7 @@ function escapeHTML(text) {
     const div =
         document.createElement("div");
 
-    div.textContent =
-        String(text);
+    div.textContent = text;
 
     return div.innerHTML;
 
