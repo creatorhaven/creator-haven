@@ -102,20 +102,19 @@ generateVideoButton.addEventListener("click", async function () {
                 "Content-Type": "application/json"
             },
 
-            body: JSON.stringify({
+           body: JSON.stringify({
 
-                prompt: prompt,
+    type: "video",
 
-                size: size,
+    prompt: prompt,
 
-                duration: Number(videoDuration),
+    size: size,
 
-                style: style
+    duration: Number(videoDuration),
 
-            })
+    style: style
 
-        });
-
+})
 
         const data = await response.json();
 
