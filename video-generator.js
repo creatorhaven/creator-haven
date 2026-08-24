@@ -1,11 +1,27 @@
 // ======================================
-// CREATOR HAVEN - VIDEO GENERATOR
+// CREATOR HAVEN - FREE VIDEO GENERATOR
 // ======================================
 
-const videoPrompt = document.getElementById("videoPrompt");
-const videoSize = document.getElementById("videoSize");
-const duration = document.getElementById("duration");
-const videoStyle = document.getElementById("videoStyle");
+// Your existing Cloudflare Worker
+const VIDEO_API =
+    "https://creator-haven-api.smhealinghub.workers.dev/";
+
+
+// ======================================
+// PAGE ELEMENTS
+// ======================================
+
+const videoPrompt =
+    document.getElementById("videoPrompt");
+
+const videoSize =
+    document.getElementById("videoSize");
+
+const duration =
+    document.getElementById("duration");
+
+const videoStyle =
+    document.getElementById("videoStyle");
 
 const generateVideoButton =
     document.getElementById("generateVideoButton");
@@ -15,125 +31,67 @@ const videoResultArea =
 
 
 // ======================================
-// CLOUDFLARE VIDEO API
-// ======================================
-
-const VIDEO_API =
-    "https://creator-haven-api.smhealinghub.workers.dev/";
-
-
-// ======================================
 // GENERATE VIDEO
 // ======================================
 
-generateVideoButton.addEventListener("click", async function () {
+generateVideoButton.addEventListener(
+    "click",
+    async function () {
 
-    const prompt = videoPrompt.value.trim();
-    const size = videoSize.value;
-    const videoDuration = duration.value;
-    const style = videoStyle.value;
+        const prompt =
+            videoPrompt.value.trim();
 
-    // Check prompt
-    if (!prompt) {
+        const size =
+            videoSize.value;
 
-        videoResultArea.innerHTML = `
-            <div class="result-placeholder">
+        const videoDuration =
+            Number(duration.value);
 
-                <div class="result-icon">
-                    💭
+        const style =
+            videoStyle.value;
+
+
+        // ==================================
+        // CHECK PROMPT
+        // ==================================
+
+        if (!prompt) {
+
+            videoResultArea.innerHTML = `
+                <div class="result-placeholder">
+
+                    <div class="result-icon">
+                        💭
+                    </div>
+
+                    <h2>
+                        Tell me what you imagine
+                    </h2>
+
+                    <p>
+                        Describe the video you want to create.
+                    </p>
+
                 </div>
+            `;
 
-                <h2>
-                    Tell me what you imagine
-                </h2>
+            videoPrompt.focus();
 
-                <p>
-                    Describe the video you want to create.
-                </p>
-
-            </div>
-        `;
-
-        videoPrompt.focus();
-        return;
-    }
-
-
-    // Loading state
-    generateVideoButton.disabled = true;
-
-    generateVideoButton.textContent =
-        "⏳ Generating your video...";
-
-    videoResultArea.innerHTML = `
-        <div class="result-placeholder">
-
-            <div class="result-icon">
-                🎬
-            </div>
-
-            <h2>
-                Creating your video...
-            </h2>
-
-            <p>
-                This may take a little while.
-                Please keep this page open.
-            </p>
-
-        </div>
-    `;
-
-
-    try {
-
-        // Send request to Cloudflare Worker
-        const response = await fetch(VIDEO_API, {
-
-            method: "POST",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-
-                // IMPORTANT:
-                // Tell Cloudflare this is a VIDEO request
-                type: "video",
-
-                prompt: prompt,
-
-                size: size,
-
-                duration: Number(videoDuration),
-
-                style: style
-
-            })
-
-        });
-
-
-        const data = await response.json();
-
-
-        // Check API response
-        if (!response.ok || !data.success) {
-
-            throw new Error(
-                data.error || "Video generation failed."
-            );
-
+            return;
         }
 
 
-        // ======================================
-        // DISPLAY VIDEO
-        // ======================================
+        // ==================================
+        // LOADING
+        // ==================================
+
+        generateVideoButton.disabled = true;
+
+        generateVideoButton.textContent =
+            "⏳ Creating your video...";
+
 
         videoResultArea.innerHTML = `
-
             <div class="result-placeholder">
 
                 <div class="result-icon">
@@ -141,78 +99,538 @@ generateVideoButton.addEventListener("click", async function () {
                 </div>
 
                 <h2>
-                    Your video is ready!
-                </h2>
-
-                <video
-                    controls
-                    autoplay
-                    loop
-                    playsinline
-                    style="
-                        width: 100%;
-                        max-width: 800px;
-                        border-radius: 16px;
-                        margin-top: 20px;
-                    "
-                    src="${data.video}">
-                </video>
-
-                <br><br>
-
-                <a
-                    href="${data.video}"
-                    download
-                    target="_blank"
-                    class="tool-button">
-                    ⬇️ Download Video
-                </a>
-
-            </div>
-
-        `;
-
-    }
-
-
-    catch (error) {
-
-        console.error(
-            "Video generation error:",
-            error
-        );
-
-
-        videoResultArea.innerHTML = `
-
-            <div class="result-placeholder">
-
-                <div class="result-icon">
-                    ⚠️
-                </div>
-
-                <h2>
-                    Video generation failed
+                    Creating your video...
                 </h2>
 
                 <p>
-                    ${escapeHTML(error.message)}
+                    First we're creating your AI image,
+                    then turning it into a short video.
+                </p>
+
+                <p>
+                    Please keep this page open.
                 </p>
 
             </div>
-
         `;
 
+
+        try {
+
+            // ==================================
+            // GENERATE IMAGE USING YOUR
+            // EXISTING FREE CLOUDFLARE WORKER
+            // ==================================
+
+            const response =
+                await fetch(VIDEO_API, {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        type: "image",
+
+                        prompt: prompt,
+
+                        style: style
+
+                    })
+
+                });
+
+
+            const data =
+                await response.json();
+
+
+            // ==================================
+            // CHECK API RESPONSE
+            // ==================================
+
+            if (!response.ok ||
+                !data.success ||
+                !data.image) {
+
+                throw new Error(
+                    data.error ||
+                    "Image generation failed."
+                );
+
+            }
+
+
+            // ==================================
+            // CREATE IMAGE DATA URL
+            // ==================================
+
+            const imageData =
+                "data:image/png;base64," +
+                data.image;
+
+
+            // ==================================
+            // CREATE VIDEO
+            // ==================================
+
+            videoResultArea.innerHTML = `
+                <div class="result-placeholder">
+
+                    <div class="result-icon">
+                        🎬
+                    </div>
+
+                    <h2>
+                        Creating your video...
+                    </h2>
+
+                    <p>
+                        Adding gentle cinematic movement.
+                    </p>
+
+                    <canvas
+                        id="videoCanvas"
+                        style="
+                            display:none;
+                        ">
+                    </canvas>
+
+                </div>
+            `;
+
+
+            const videoBlob =
+                await createMotionVideo(
+                    imageData,
+                    size,
+                    videoDuration
+                );
+
+
+            // ==================================
+            // CREATE DOWNLOAD URL
+            // ==================================
+
+            const videoURL =
+                URL.createObjectURL(videoBlob);
+
+
+            // ==================================
+            // DISPLAY VIDEO
+            // ==================================
+
+            videoResultArea.innerHTML = `
+
+                <div class="result-placeholder">
+
+                    <div class="result-icon">
+                        ✨
+                    </div>
+
+                    <h2>
+                        Your video is ready!
+                    </h2>
+
+                    <p>
+                        Your free Creator Haven video
+                        has been created.
+                    </p>
+
+                    <video
+                        controls
+                        autoplay
+                        loop
+                        playsinline
+                        style="
+                            width:100%;
+                            max-width:800px;
+                            border-radius:16px;
+                            margin-top:20px;
+                        "
+                        src="${videoURL}">
+                    </video>
+
+                    <br><br>
+
+                    <a
+                        href="${videoURL}"
+                        download="creator-haven-video.webm"
+                        class="tool-button">
+
+                        ⬇️ Download Video
+
+                    </a>
+
+                    <p style="margin-top:15px;">
+                        Format: WebM · ${videoDuration} seconds
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+
+        catch (error) {
+
+            console.error(
+                "Video generation error:",
+                error
+            );
+
+
+            videoResultArea.innerHTML = `
+
+                <div class="result-placeholder">
+
+                    <div class="result-icon">
+                        ⚠️
+                    </div>
+
+                    <h2>
+                        Video generation failed
+                    </h2>
+
+                    <p>
+                        ${escapeHTML(error.message)}
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+
+        // ==================================
+        // RESET BUTTON
+        // ==================================
+
+        generateVideoButton.disabled = false;
+
+        generateVideoButton.textContent =
+            "🎬 Generate Video";
+
     }
+);
 
 
-    // Reset button
-    generateVideoButton.disabled = false;
+// ======================================
+// CREATE MOTION VIDEO
+// ======================================
 
-    generateVideoButton.textContent =
-        "🎬 Generate Video";
+async function createMotionVideo(
+    imageSrc,
+    size,
+    seconds
+) {
 
-});
+    return new Promise(
+        function (resolve, reject) {
+
+            const image =
+                new Image();
+
+            image.onload =
+                function () {
+
+                    // ------------------------------
+                    // VIDEO DIMENSIONS
+                    // ------------------------------
+
+                    let width = 1280;
+                    let height = 720;
+
+                    if (size === "portrait") {
+                        width = 720;
+                        height = 1280;
+                    }
+
+                    if (size === "square") {
+                        width = 720;
+                        height = 720;
+                    }
+
+
+                    // ------------------------------
+                    // CANVAS
+                    // ------------------------------
+
+                    const canvas =
+                        document.createElement(
+                            "canvas"
+                        );
+
+                    canvas.width =
+                        width;
+
+                    canvas.height =
+                        height;
+
+
+                    const ctx =
+                        canvas.getContext("2d");
+
+
+                    // ------------------------------
+                    // VIDEO STREAM
+                    // ------------------------------
+
+                    const stream =
+                        canvas.captureStream(30);
+
+
+                    // ------------------------------
+                    // WEBM RECORDER
+                    // ------------------------------
+
+                    let recorder;
+
+                    try {
+
+                        recorder =
+                            new MediaRecorder(
+                                stream,
+                                {
+                                    mimeType:
+                                        "video/webm;codecs=vp9"
+                                }
+                            );
+
+                    }
+
+                    catch (error) {
+
+                        recorder =
+                            new MediaRecorder(
+                                stream
+                            );
+
+                    }
+
+
+                    const chunks = [];
+
+
+                    recorder.ondataavailable =
+                        function (event) {
+
+                            if (event.data.size > 0) {
+
+                                chunks.push(
+                                    event.data
+                                );
+
+                            }
+
+                        };
+
+
+                    recorder.onstop =
+                        function () {
+
+                            const blob =
+                                new Blob(
+                                    chunks,
+                                    {
+                                        type:
+                                            "video/webm"
+                                    }
+                                );
+
+                            resolve(blob);
+
+                        };
+
+
+                    recorder.onerror =
+                        function (event) {
+
+                            reject(event.error);
+
+                        };
+
+
+                    // ------------------------------
+                    // START RECORDING
+                    // ------------------------------
+
+                    recorder.start();
+
+
+                    const fps = 30;
+
+                    const totalFrames =
+                        seconds * fps;
+
+                    let frame = 0;
+
+
+                    // ------------------------------
+                    // ANIMATION
+                    // ------------------------------
+
+                    function animate() {
+
+                        if (frame >= totalFrames) {
+
+                            recorder.stop();
+
+                            return;
+
+                        }
+
+
+                        const progress =
+                            frame /
+                            totalFrames;
+
+
+                        // Gentle cinematic zoom
+
+                        const zoom =
+                            1 +
+                            (progress * 0.08);
+
+
+                        // Slow horizontal movement
+
+                        const moveX =
+                            Math.sin(
+                                progress *
+                                Math.PI
+                            ) * 20;
+
+
+                        // --------------------------
+                        // DRAW BACKGROUND
+                        // --------------------------
+
+                        ctx.fillStyle =
+                            "#000000";
+
+                        ctx.fillRect(
+                            0,
+                            0,
+                            width,
+                            height
+                        );
+
+
+                        // --------------------------
+                        // CALCULATE IMAGE SIZE
+                        // --------------------------
+
+                        const imageRatio =
+                            image.width /
+                            image.height;
+
+                        const canvasRatio =
+                            width /
+                            height;
+
+
+                        let drawWidth;
+                        let drawHeight;
+
+
+                        if (
+                            imageRatio >
+                            canvasRatio
+                        ) {
+
+                            drawHeight =
+                                height *
+                                zoom;
+
+                            drawWidth =
+                                drawHeight *
+                                imageRatio;
+
+                        }
+
+                        else {
+
+                            drawWidth =
+                                width *
+                                zoom;
+
+                            drawHeight =
+                                drawWidth /
+                                imageRatio;
+
+                        }
+
+
+                        // --------------------------
+                        // CENTER IMAGE
+                        // --------------------------
+
+                        const x =
+                            (width -
+                                drawWidth) /
+                                2 +
+                            moveX;
+
+                        const y =
+                            (height -
+                                drawHeight) /
+                                2;
+
+
+                        // --------------------------
+                        // DRAW IMAGE
+                        // --------------------------
+
+                        ctx.drawImage(
+                            image,
+                            x,
+                            y,
+                            drawWidth,
+                            drawHeight
+                        );
+
+
+                        frame++;
+
+
+                        requestAnimationFrame(
+                            animate
+                        );
+
+                    }
+
+
+                    animate();
+
+                };
+
+
+            image.onerror =
+                function () {
+
+                    reject(
+                        new Error(
+                            "Could not load generated image."
+                        )
+                    );
+
+                };
+
+
+            image.src =
+                imageSrc;
+
+        }
+    );
+
+}
 
 
 // ======================================
@@ -220,26 +638,39 @@ generateVideoButton.addEventListener("click", async function () {
 // ======================================
 
 const inspirationButtons =
-    document.querySelectorAll(".tip-grid button");
+    document.querySelectorAll(
+        ".tip-grid button"
+    );
 
 
-inspirationButtons.forEach(function (button) {
+inspirationButtons.forEach(
+    function (button) {
 
-    button.addEventListener("click", function () {
+        button.addEventListener(
+            "click",
+            function () {
 
-        const text = button.textContent;
+                const text =
+                    button.textContent;
 
-        const cleanText = text
-            .replace(/^[^\w]+/u, "")
-            .trim();
+                const cleanText =
+                    text
+                        .replace(
+                            /^[^\w]+/u,
+                            ""
+                        )
+                        .trim();
 
-        videoPrompt.value = cleanText;
+                videoPrompt.value =
+                    cleanText;
 
-        videoPrompt.focus();
+                videoPrompt.focus();
 
-    });
+            }
+        );
 
-});
+    }
+);
 
 
 // ======================================
@@ -249,9 +680,12 @@ inspirationButtons.forEach(function (button) {
 function escapeHTML(text) {
 
     const div =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
 
-    div.textContent = text;
+    div.textContent =
+        text;
 
     return div.innerHTML;
 
