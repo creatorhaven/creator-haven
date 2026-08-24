@@ -33,9 +33,7 @@ generateVideoButton.addEventListener("click", async function () {
     const videoDuration = duration.value;
     const style = videoStyle.value;
 
-
     // Check prompt
-
     if (!prompt) {
 
         videoResultArea.innerHTML = `
@@ -57,18 +55,15 @@ generateVideoButton.addEventListener("click", async function () {
         `;
 
         videoPrompt.focus();
-
         return;
     }
 
 
     // Loading state
-
     generateVideoButton.disabled = true;
 
     generateVideoButton.textContent =
         "⏳ Generating your video...";
-
 
     videoResultArea.innerHTML = `
         <div class="result-placeholder">
@@ -93,7 +88,6 @@ generateVideoButton.addEventListener("click", async function () {
     try {
 
         // Send request to Cloudflare Worker
-
         const response = await fetch(VIDEO_API, {
 
             method: "POST",
@@ -102,25 +96,29 @@ generateVideoButton.addEventListener("click", async function () {
                 "Content-Type": "application/json"
             },
 
-           body: JSON.stringify({
+            body: JSON.stringify({
 
-    type: "video",
+                // IMPORTANT:
+                // Tell Cloudflare this is a VIDEO request
+                type: "video",
 
-    prompt: prompt,
+                prompt: prompt,
 
-    size: size,
+                size: size,
 
-    duration: Number(videoDuration),
+                duration: Number(videoDuration),
 
-    style: style
+                style: style
 
-})
+            })
+
+        });
+
 
         const data = await response.json();
 
 
-        // Check for API error
-
+        // Check API response
         if (!response.ok || !data.success) {
 
             throw new Error(
@@ -179,7 +177,10 @@ generateVideoButton.addEventListener("click", async function () {
 
     catch (error) {
 
-        console.error("Video generation error:", error);
+        console.error(
+            "Video generation error:",
+            error
+        );
 
 
         videoResultArea.innerHTML = `
@@ -206,7 +207,6 @@ generateVideoButton.addEventListener("click", async function () {
 
 
     // Reset button
-
     generateVideoButton.disabled = false;
 
     generateVideoButton.textContent =
