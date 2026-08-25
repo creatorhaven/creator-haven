@@ -31,122 +31,158 @@ const videoResultArea =
 
 
 // ======================================
-// CHECK PAGE ELEMENTS
-// ======================================
-
-if (
-    !videoPrompt ||
-    !videoSize ||
-    !duration ||
-    !videoStyle ||
-    !generateVideoButton ||
-    !videoResultArea
-) {
-    console.error(
-        "Creator Haven: Video generator elements are missing from the page."
-    );
-}
-
-
-// ======================================
 // GENERATE VIDEO
 // ======================================
 
-if (generateVideoButton) {
+generateVideoButton.addEventListener(
+    "click",
+    async function () {
 
-    generateVideoButton.addEventListener(
-        "click",
-        async function () {
+        const prompt =
+            videoPrompt.value.trim();
 
-            const prompt =
-                videoPrompt.value.trim();
+        const size =
+            videoSize.value;
 
-            const size =
-                videoSize.value;
+        const videoDuration =
+            Number(duration.value);
 
-            const videoDuration =
-                Number(duration.value);
-
-            const style =
-                videoStyle.value;
+        const style =
+            videoStyle.value;
 
 
-            // ==================================
-            // CHECK PROMPT
-            // ==================================
+        // ==================================
+        // CHECK PROMPT
+        // ==================================
 
-            if (!prompt) {
-
-                videoResultArea.innerHTML = `
-                    <div class="result-placeholder">
-
-                        <div class="result-icon">
-                            💭
-                        </div>
-
-                        <h2>
-                            Tell me what you imagine
-                        </h2>
-
-                        <p>
-                            Describe the video you want to create.
-                        </p>
-
-                    </div>
-                `;
-
-                videoPrompt.focus();
-
-                return;
-            }
-
-
-            // ==================================
-            // CHECK DURATION
-            // ==================================
-
-            if (
-                videoDuration !== 5 &&
-                videoDuration !== 10
-            ) {
-
-                videoResultArea.innerHTML = `
-                    <div class="result-placeholder">
-
-                        <div class="result-icon">
-                            ⚠️
-                        </div>
-
-                        <h2>
-                            Invalid duration
-                        </h2>
-
-                        <p>
-                            Please choose 5 or 10 seconds.
-                        </p>
-
-                    </div>
-                `;
-
-                return;
-            }
-
-
-            // ==================================
-            // LOADING STATE
-            // ==================================
-
-            generateVideoButton.disabled = true;
-
-            generateVideoButton.textContent =
-                "⏳ Creating your video...";
-
+        if (!prompt) {
 
             videoResultArea.innerHTML = `
                 <div class="result-placeholder">
 
                     <div class="result-icon">
-                        ✨
+                        💭
+                    </div>
+
+                    <h2>
+                        Tell me what you imagine
+                    </h2>
+
+                    <p>
+                        Describe the video you want to create.
+                    </p>
+
+                </div>
+            `;
+
+            videoPrompt.focus();
+
+            return;
+        }
+
+
+        // ==================================
+        // LOADING
+        // ==================================
+
+        generateVideoButton.disabled = true;
+
+        generateVideoButton.textContent =
+            "⏳ Creating your video...";
+
+
+        videoResultArea.innerHTML = `
+            <div class="result-placeholder">
+
+                <div class="result-icon">
+                    ✨
+                </div>
+
+                <h2>
+                    Creating your video...
+                </h2>
+
+                <p>
+                    First we're creating your AI image,
+                    then turning it into a short video.
+                </p>
+
+                <p>
+                    Please keep this page open.
+                </p>
+
+            </div>
+        `;
+
+
+        try {
+
+            // ==================================
+            // GENERATE AI IMAGE
+            // ==================================
+
+            const response =
+                await fetch(VIDEO_API, {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        type: "image",
+
+                        prompt: prompt,
+
+                        style: style
+
+                    })
+
+                });
+
+
+            const data =
+                await response.json();
+
+
+            // ==================================
+            // CHECK RESPONSE
+            // ==================================
+
+            if (
+                !response.ok ||
+                !data.success ||
+                !data.image
+            ) {
+
+                throw new Error(
+                    data.error ||
+                    "Image generation failed."
+                );
+
+            }
+
+
+            // ==================================
+            // IMAGE DATA URL
+            // ==================================
+
+            const imageData =
+                "data:image/png;base64," +
+                data.image;
+
+
+            // ==================================
+            // VIDEO CREATION MESSAGE
+            // ==================================
+
+            videoResultArea.innerHTML = `
+                <div class="result-placeholder">
+
+                    <div class="result-icon">
+                        🎬
                     </div>
 
                     <h2>
@@ -154,235 +190,139 @@ if (generateVideoButton) {
                     </h2>
 
                     <p>
-                        First we're creating your AI image,
-                        then turning it into a short video.
+                        Adding gentle cinematic movement.
                     </p>
 
                     <p>
-                        Please keep this page open.
+                        Creating ${videoDuration}-second video...
                     </p>
 
                 </div>
             `;
 
 
-            try {
-
-                // ==================================
-                // GENERATE AI IMAGE
-                // ==================================
-
-                const response =
-                    await fetch(
-                        VIDEO_API,
-                        {
-                            method: "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            body: JSON.stringify({
-
-                                type: "image",
-
-                                prompt: prompt,
-
-                                style: style
-
-                            })
-                        }
-                    );
-
-
-                const data =
-                    await response.json();
-
-
-                // ==================================
-                // CHECK API RESPONSE
-                // ==================================
-
-                if (
-                    !response.ok ||
-                    !data.success ||
-                    !data.image
-                ) {
-
-                    throw new Error(
-                        data.error ||
-                        "Image generation failed."
-                    );
-
-                }
-
-
-                // ==================================
-                // CREATE IMAGE DATA URL
-                // ==================================
-
-                const imageData =
-                    "data:image/png;base64," +
-                    data.image;
-
-
-                // ==================================
-                // SHOW VIDEO CREATION MESSAGE
-                // ==================================
-
-                videoResultArea.innerHTML = `
-                    <div class="result-placeholder">
-
-                        <div class="result-icon">
-                            🎬
-                        </div>
-
-                        <h2>
-                            Creating your video...
-                        </h2>
-
-                        <p>
-                            Adding gentle cinematic movement.
-                        </p>
-
-                        <p>
-                            Duration: ${videoDuration} seconds
-                        </p>
-
-                    </div>
-                `;
-
-
-                // ==================================
-                // CREATE MOTION VIDEO
-                // ==================================
-
-                const videoBlob =
-                    await createMotionVideo(
-                        imageData,
-                        size,
-                        videoDuration
-                    );
-
-
-                // ==================================
-                // CREATE VIDEO URL
-                // ==================================
-
-                const videoURL =
-                    URL.createObjectURL(videoBlob);
-
-
-                // ==================================
-                // DISPLAY VIDEO
-                // ==================================
-
-                videoResultArea.innerHTML = `
-
-                    <div class="result-placeholder">
-
-                        <div class="result-icon">
-                            ✨
-                        </div>
-
-                        <h2>
-                            Your video is ready!
-                        </h2>
-
-                        <p>
-                            Your free Creator Haven video
-                            has been created.
-                        </p>
-
-                        <video
-                            controls
-                            autoplay
-                            loop
-                            playsinline
-                            style="
-                                width: 100%;
-                                max-width: 800px;
-                                border-radius: 16px;
-                                margin-top: 20px;
-                            "
-                            src="${videoURL}">
-                        </video>
-
-                        <br>
-                        <br>
-
-                        <a
-                            href="${videoURL}"
-                            download="creator-haven-${videoDuration}s-video.webm"
-                            class="tool-button">
-
-                            ⬇️ Download Video
-
-                        </a>
-
-                        <p style="margin-top: 15px;">
-                            Format: WebM · ${videoDuration} seconds
-                        </p>
-
-                    </div>
-
-                `;
-
-            }
-
-
             // ==================================
-            // ERROR
+            // CREATE VIDEO
             // ==================================
 
-            catch (error) {
-
-                console.error(
-                    "Video generation error:",
-                    error
+            const videoBlob =
+                await createMotionVideo(
+                    imageData,
+                    size,
+                    videoDuration
                 );
 
 
-                videoResultArea.innerHTML = `
+            // ==================================
+            // CREATE VIDEO URL
+            // ==================================
 
-                    <div class="result-placeholder">
+            const videoURL =
+                URL.createObjectURL(videoBlob);
 
-                        <div class="result-icon">
-                            ⚠️
-                        </div>
 
-                        <h2>
-                            Video generation failed
-                        </h2>
+            // ==================================
+            // DISPLAY VIDEO
+            // ==================================
 
-                        <p>
-                            ${escapeHTML(
-                                error.message ||
-                                "Something went wrong."
-                            )}
-                        </p>
+            videoResultArea.innerHTML = `
 
+                <div class="result-placeholder">
+
+                    <div class="result-icon">
+                        ✨
                     </div>
 
-                `;
+                    <h2>
+                        Your video is ready!
+                    </h2>
 
-            }
+                    <p>
+                        Your free Creator Haven video
+                        has been created.
+                    </p>
 
+                    <video
+                        controls
+                        autoplay
+                        playsinline
+                        style="
+                            width:100%;
+                            max-width:800px;
+                            border-radius:16px;
+                            margin-top:20px;
+                        "
+                        src="${videoURL}">
+                    </video>
 
-            // ==================================
-            // RESET BUTTON
-            // ==================================
+                    <br><br>
 
-            generateVideoButton.disabled = false;
+                    <a
+                        href="${videoURL}"
+                        download="creator-haven-video-${videoDuration}s.webm"
+                        class="tool-button">
 
-            generateVideoButton.textContent =
-                "🎬 Generate Video";
+                        ⬇️ Download Video
+
+                    </a>
+
+                    <p style="margin-top:15px;">
+                        Format: WebM · ${videoDuration} seconds
+                    </p>
+
+                </div>
+
+            `;
 
         }
-    );
 
-}
+
+        // ==================================
+        // ERROR
+        // ==================================
+
+        catch (error) {
+
+            console.error(
+                "Video generation error:",
+                error
+            );
+
+
+            videoResultArea.innerHTML = `
+
+                <div class="result-placeholder">
+
+                    <div class="result-icon">
+                        ⚠️
+                    </div>
+
+                    <h2>
+                        Video generation failed
+                    </h2>
+
+                    <p>
+                        ${escapeHTML(error.message)}
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+
+        // ==================================
+        // RESET BUTTON
+        // ==================================
+
+        generateVideoButton.disabled = false;
+
+        generateVideoButton.textContent =
+            "🎬 Generate Video";
+
+    }
+);
 
 
 // ======================================
@@ -409,9 +349,9 @@ async function createMotionVideo(
             image.onload =
                 function () {
 
-                    // ------------------------------
+                    // ==================================
                     // VIDEO DIMENSIONS
-                    // ------------------------------
+                    // ==================================
 
                     let width = 1280;
                     let height = 720;
@@ -433,51 +373,32 @@ async function createMotionVideo(
                     }
 
 
-                    // ------------------------------
-                    // CREATE CANVAS
-                    // ------------------------------
+                    // ==================================
+                    // CANVAS
+                    // ==================================
 
                     const canvas =
-                        document.createElement(
-                            "canvas"
-                        );
+                        document.createElement("canvas");
 
-
-                    canvas.width =
-                        width;
-
-                    canvas.height =
-                        height;
+                    canvas.width = width;
+                    canvas.height = height;
 
 
                     const ctx =
                         canvas.getContext("2d");
 
 
-                    if (!ctx) {
-
-                        reject(
-                            new Error(
-                                "Could not create video canvas."
-                            )
-                        );
-
-                        return;
-
-                    }
-
-
-                    // ------------------------------
-                    // CREATE VIDEO STREAM
-                    // ------------------------------
+                    // ==================================
+                    // VIDEO STREAM
+                    // ==================================
 
                     const stream =
                         canvas.captureStream(30);
 
 
-                    // ------------------------------
-                    // CREATE RECORDER
-                    // ------------------------------
+                    // ==================================
+                    // MEDIA RECORDER
+                    // ==================================
 
                     let recorder;
 
@@ -497,40 +418,24 @@ async function createMotionVideo(
 
                     catch (error) {
 
-                        try {
+                        console.warn(
+                            "VP9 unavailable. Using default WebM recorder."
+                        );
 
-                            recorder =
-                                new MediaRecorder(
-                                    stream,
-                                    {
-                                        mimeType:
-                                            "video/webm"
-                                    }
-                                );
-
-                        }
-
-                        catch (secondError) {
-
-                            reject(
-                                new Error(
-                                    "Your browser does not support WebM video recording."
-                                )
+                        recorder =
+                            new MediaRecorder(
+                                stream
                             );
-
-                            return;
-
-                        }
 
                     }
 
 
-                    // ------------------------------
-                    // VIDEO DATA
-                    // ------------------------------
-
                     const chunks = [];
 
+
+                    // ==================================
+                    // COLLECT VIDEO DATA
+                    // ==================================
 
                     recorder.ondataavailable =
                         function (event) {
@@ -549,9 +454,9 @@ async function createMotionVideo(
                         };
 
 
-                    // ------------------------------
+                    // ==================================
                     // VIDEO FINISHED
-                    // ------------------------------
+                    // ==================================
 
                     recorder.onstop =
                         function () {
@@ -565,24 +470,14 @@ async function createMotionVideo(
                                     }
                                 );
 
-
-                            stream
-                                .getTracks()
-                                .forEach(
-                                    function (track) {
-                                        track.stop();
-                                    }
-                                );
-
-
                             resolve(blob);
 
                         };
 
 
-                    // ------------------------------
+                    // ==================================
                     // RECORDER ERROR
-                    // ------------------------------
+                    // ==================================
 
                     recorder.onerror =
                         function (event) {
@@ -601,12 +496,31 @@ async function createMotionVideo(
                     // START RECORDING
                     // ==================================
 
-                    recorder.start();
+                    recorder.start(100);
 
 
                     // ==================================
-                    // REAL TIME CONTROL
+                    // IMPORTANT TIMING SECTION
                     // ==================================
+
+                    /*
+                     * MediaRecorder can stop slightly early
+                     * because of browser timing and WebM encoding.
+                     *
+                     * We therefore give the recorder a small
+                     * safety buffer.
+                     *
+                     * 5 seconds  -> approximately 5 seconds
+                     * 10 seconds -> approximately 10 seconds
+                     */
+
+                    const targetDuration =
+                        seconds * 1000;
+
+
+                    const recordingDuration =
+                        targetDuration + 500;
+
 
                     const startTime =
                         performance.now();
@@ -634,29 +548,38 @@ async function createMotionVideo(
                         const progress =
                             Math.min(
                                 elapsed /
-                                (seconds * 1000),
+                                targetDuration,
                                 1
                             );
 
 
-                        // --------------------------
+                        // ==================================
                         // DRAW FRAME
-                        // --------------------------
+                        // ==================================
 
                         drawFrame(progress);
 
 
-                        // --------------------------
-                        // STOP AT EXACT DURATION
-                        // --------------------------
+                        // ==================================
+                        // STOP RECORDING
+                        // ==================================
 
-                        if (progress >= 1) {
+                        if (
+                            elapsed >=
+                            recordingDuration
+                        ) {
 
                             stopped = true;
 
 
-                            // Give the recorder
-                            // the final frame.
+                            // Draw final frame
+                            drawFrame(1);
+
+
+                            /*
+                             * Small delay gives the recorder
+                             * time to capture the final frame.
+                             */
 
                             setTimeout(
                                 function () {
@@ -671,7 +594,7 @@ async function createMotionVideo(
                                     }
 
                                 },
-                                50
+                                100
                             );
 
 
@@ -680,9 +603,9 @@ async function createMotionVideo(
                         }
 
 
-                        // --------------------------
+                        // ==================================
                         // CONTINUE ANIMATION
-                        // --------------------------
+                        // ==================================
 
                         requestAnimationFrame(
                             animate
@@ -697,29 +620,28 @@ async function createMotionVideo(
 
                     function drawFrame(progress) {
 
-                        // --------------------------
+                        // ----------------------------------
                         // GENTLE CINEMATIC ZOOM
-                        // --------------------------
+                        // ----------------------------------
 
                         const zoom =
                             1 +
                             (progress * 0.08);
 
 
-                        // --------------------------
+                        // ----------------------------------
                         // SLOW HORIZONTAL MOVEMENT
-                        // --------------------------
+                        // ----------------------------------
 
                         const moveX =
                             Math.sin(
-                                progress *
-                                Math.PI
+                                progress * Math.PI
                             ) * 20;
 
 
-                        // --------------------------
+                        // ----------------------------------
                         // BACKGROUND
-                        // --------------------------
+                        // ----------------------------------
 
                         ctx.fillStyle =
                             "#000000";
@@ -732,9 +654,9 @@ async function createMotionVideo(
                         );
 
 
-                        // --------------------------
+                        // ----------------------------------
                         // IMAGE RATIO
-                        // --------------------------
+                        // ----------------------------------
 
                         const imageRatio =
                             image.width /
@@ -750,9 +672,9 @@ async function createMotionVideo(
                         let drawHeight;
 
 
-                        // --------------------------
+                        // ----------------------------------
                         // CALCULATE IMAGE SIZE
-                        // --------------------------
+                        // ----------------------------------
 
                         if (
                             imageRatio >
@@ -760,8 +682,7 @@ async function createMotionVideo(
                         ) {
 
                             drawHeight =
-                                height *
-                                zoom;
+                                height * zoom;
 
                             drawWidth =
                                 drawHeight *
@@ -772,8 +693,7 @@ async function createMotionVideo(
                         else {
 
                             drawWidth =
-                                width *
-                                zoom;
+                                width * zoom;
 
                             drawHeight =
                                 drawWidth /
@@ -782,28 +702,26 @@ async function createMotionVideo(
                         }
 
 
-                        // --------------------------
+                        // ----------------------------------
                         // CENTER IMAGE
-                        // --------------------------
+                        // ----------------------------------
 
                         const x =
-                            (
-                                width -
-                                drawWidth
-                            ) / 2 +
+                            (width -
+                                drawWidth) /
+                                2 +
                             moveX;
 
 
                         const y =
-                            (
-                                height -
-                                drawHeight
-                            ) / 2;
+                            (height -
+                                drawHeight) /
+                                2;
 
 
-                        // --------------------------
+                        // ----------------------------------
                         // DRAW IMAGE
-                        // --------------------------
+                        // ----------------------------------
 
                         ctx.drawImage(
                             image,
@@ -906,9 +824,7 @@ inspirationButtons.forEach(
 function escapeHTML(text) {
 
     const div =
-        document.createElement(
-            "div"
-        );
+        document.createElement("div");
 
 
     div.textContent =
