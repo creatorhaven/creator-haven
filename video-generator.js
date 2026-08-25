@@ -1,4 +1,3 @@
-```javascript
 // ======================================
 // CREATOR HAVEN - FREE VIDEO GENERATOR
 // ======================================
@@ -83,6 +82,37 @@ generateVideoButton.addEventListener(
 
 
         // ==================================
+        // CHECK DURATION
+        // ==================================
+
+        if (
+            videoDuration !== 5 &&
+            videoDuration !== 10
+        ) {
+
+            videoResultArea.innerHTML = `
+                <div class="result-placeholder">
+
+                    <div class="result-icon">
+                        ⚠️
+                    </div>
+
+                    <h2>
+                        Invalid duration
+                    </h2>
+
+                    <p>
+                        Please choose 5 or 10 seconds.
+                    </p>
+
+                </div>
+            `;
+
+            return;
+        }
+
+
+        // ==================================
         // LOADING
         // ==================================
 
@@ -119,7 +149,7 @@ generateVideoButton.addEventListener(
         try {
 
             // ==================================
-            // GENERATE IMAGE USING CLOUDFLARE
+            // GENERATE IMAGE
             // ==================================
 
             const response =
@@ -195,13 +225,6 @@ generateVideoButton.addEventListener(
                         Adding gentle cinematic movement.
                     </p>
 
-                    <canvas
-                        id="videoCanvas"
-                        style="
-                            display:none;
-                        ">
-                    </canvas>
-
                 </div>
             `;
 
@@ -261,7 +284,7 @@ generateVideoButton.addEventListener(
 
                     <a
                         href="${videoURL}"
-                        download="creator-haven-video.webm"
+                        download="creator-haven-video-${videoDuration}s.webm"
                         class="tool-button">
 
                         ⬇️ Download Video
@@ -344,12 +367,16 @@ async function createMotionVideo(
                 new Image();
 
 
+            // ==================================
+            // IMAGE LOADED
+            // ==================================
+
             image.onload =
                 function () {
 
-                    // ------------------------------
+                    // --------------------------------
                     // VIDEO DIMENSIONS
-                    // ------------------------------
+                    // --------------------------------
 
                     let width = 1280;
                     let height = 720;
@@ -371,15 +398,14 @@ async function createMotionVideo(
                     }
 
 
-                    // ------------------------------
+                    // --------------------------------
                     // CANVAS
-                    // ------------------------------
+                    // --------------------------------
 
                     const canvas =
                         document.createElement(
                             "canvas"
                         );
-
 
                     canvas.width =
                         width;
@@ -392,17 +418,17 @@ async function createMotionVideo(
                         canvas.getContext("2d");
 
 
-                    // ------------------------------
+                    // --------------------------------
                     // VIDEO STREAM
-                    // ------------------------------
+                    // --------------------------------
 
                     const stream =
                         canvas.captureStream(30);
 
 
-                    // ------------------------------
-                    // WEBM RECORDER
-                    // ------------------------------
+                    // --------------------------------
+                    // MEDIA RECORDER
+                    // --------------------------------
 
                     let recorder;
 
@@ -433,9 +459,9 @@ async function createMotionVideo(
                     const chunks = [];
 
 
-                    // ------------------------------
+                    // --------------------------------
                     // COLLECT VIDEO DATA
-                    // ------------------------------
+                    // --------------------------------
 
                     recorder.ondataavailable =
                         function (event) {
@@ -454,9 +480,9 @@ async function createMotionVideo(
                         };
 
 
-                    // ------------------------------
+                    // --------------------------------
                     // VIDEO FINISHED
-                    // ------------------------------
+                    // --------------------------------
 
                     recorder.onstop =
                         function () {
@@ -476,9 +502,9 @@ async function createMotionVideo(
                         };
 
 
-                    // ------------------------------
+                    // --------------------------------
                     // RECORDER ERROR
-                    // ------------------------------
+                    // --------------------------------
 
                     recorder.onerror =
                         function (event) {
@@ -493,27 +519,20 @@ async function createMotionVideo(
                         };
 
 
-                    // ------------------------------
+                    // ==================================
                     // START RECORDING
-                    // ------------------------------
+                    // ==================================
 
                     recorder.start();
 
-
-                    // IMPORTANT:
-                    // Use real elapsed time instead of
-                    // counting animation frames.
-                    //
-                    // This prevents a 10-second video
-                    // from accidentally becoming 5 seconds.
 
                     const startTime =
                         performance.now();
 
 
-                    // ------------------------------
+                    // ==================================
                     // ANIMATION
-                    // ------------------------------
+                    // ==================================
 
                     function animate(currentTime) {
 
@@ -530,14 +549,18 @@ async function createMotionVideo(
                             );
 
 
-                        // --------------------------
-                        // STOP AT REQUESTED TIME
-                        // --------------------------
+                        // ------------------------------
+                        // DRAW CURRENT FRAME
+                        // ------------------------------
+
+                        drawFrame(progress);
+
+
+                        // ------------------------------
+                        // STOP AT EXACT DURATION
+                        // ------------------------------
 
                         if (progress >= 1) {
-
-                            // Draw one final frame
-                            drawFrame(1);
 
                             recorder.stop();
 
@@ -546,14 +569,9 @@ async function createMotionVideo(
                         }
 
 
-                        // --------------------------
-                        // DRAW CURRENT FRAME
-                        // --------------------------
-
-                        drawFrame(progress);
-
-
-                        // Continue animation
+                        // ------------------------------
+                        // CONTINUE ANIMATION
+                        // ------------------------------
 
                         requestAnimationFrame(
                             animate
@@ -562,31 +580,34 @@ async function createMotionVideo(
                     }
 
 
-                    // ------------------------------
+                    // ==================================
                     // DRAW FRAME
-                    // ------------------------------
+                    // ==================================
 
                     function drawFrame(progress) {
 
-                        // Gentle cinematic zoom
+                        // --------------------------------
+                        // GENTLE CINEMATIC ZOOM
+                        // --------------------------------
 
                         const zoom =
                             1 +
                             (progress * 0.08);
 
 
-                        // Slow horizontal movement
+                        // --------------------------------
+                        // SLOW HORIZONTAL MOVEMENT
+                        // --------------------------------
 
                         const moveX =
                             Math.sin(
-                                progress *
-                                Math.PI
+                                progress * Math.PI
                             ) * 20;
 
 
-                        // --------------------------
-                        // DRAW BACKGROUND
-                        // --------------------------
+                        // --------------------------------
+                        // BACKGROUND
+                        // --------------------------------
 
                         ctx.fillStyle =
                             "#000000";
@@ -599,9 +620,9 @@ async function createMotionVideo(
                         );
 
 
-                        // --------------------------
+                        // --------------------------------
                         // IMAGE RATIO
-                        // --------------------------
+                        // --------------------------------
 
                         const imageRatio =
                             image.width /
@@ -617,9 +638,9 @@ async function createMotionVideo(
                         let drawHeight;
 
 
-                        // --------------------------
+                        // --------------------------------
                         // CALCULATE IMAGE SIZE
-                        // --------------------------
+                        // --------------------------------
 
                         if (
                             imageRatio >
@@ -627,8 +648,7 @@ async function createMotionVideo(
                         ) {
 
                             drawHeight =
-                                height *
-                                zoom;
+                                height * zoom;
 
                             drawWidth =
                                 drawHeight *
@@ -639,8 +659,7 @@ async function createMotionVideo(
                         else {
 
                             drawWidth =
-                                width *
-                                zoom;
+                                width * zoom;
 
                             drawHeight =
                                 drawWidth /
@@ -649,9 +668,9 @@ async function createMotionVideo(
                         }
 
 
-                        // --------------------------
+                        // --------------------------------
                         // CENTER IMAGE
-                        // --------------------------
+                        // --------------------------------
 
                         const x =
                             (width -
@@ -666,9 +685,9 @@ async function createMotionVideo(
                                 2;
 
 
-                        // --------------------------
+                        // --------------------------------
                         // DRAW IMAGE
-                        // --------------------------
+                        // --------------------------------
 
                         ctx.drawImage(
                             image,
@@ -681,9 +700,9 @@ async function createMotionVideo(
                     }
 
 
-                    // ------------------------------
+                    // ==================================
                     // START ANIMATION
-                    // ------------------------------
+                    // ==================================
 
                     requestAnimationFrame(
                         animate
@@ -692,9 +711,9 @@ async function createMotionVideo(
                 };
 
 
-            // ------------------------------
-            // IMAGE LOAD ERROR
-            // ------------------------------
+            // ==================================
+            // IMAGE ERROR
+            // ==================================
 
             image.onerror =
                 function () {
@@ -708,9 +727,9 @@ async function createMotionVideo(
                 };
 
 
-            // ------------------------------
+            // ==================================
             // LOAD IMAGE
-            // ------------------------------
+            // ==================================
 
             image.src =
                 imageSrc;
@@ -783,4 +802,3 @@ function escapeHTML(text) {
     return div.innerHTML;
 
 }
-```
