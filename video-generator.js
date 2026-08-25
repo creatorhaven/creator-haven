@@ -1,3 +1,4 @@
+```javascript
 // ======================================
 // CREATOR HAVEN - FREE VIDEO GENERATOR
 // ======================================
@@ -118,8 +119,7 @@ generateVideoButton.addEventListener(
         try {
 
             // ==================================
-            // GENERATE IMAGE USING YOUR
-            // EXISTING FREE CLOUDFLARE WORKER
+            // GENERATE IMAGE USING CLOUDFLARE
             // ==================================
 
             const response =
@@ -153,9 +153,11 @@ generateVideoButton.addEventListener(
             // CHECK API RESPONSE
             // ==================================
 
-            if (!response.ok ||
+            if (
+                !response.ok ||
                 !data.success ||
-                !data.image) {
+                !data.image
+            ) {
 
                 throw new Error(
                     data.error ||
@@ -277,6 +279,10 @@ generateVideoButton.addEventListener(
         }
 
 
+        // ==================================
+        // ERROR
+        // ==================================
+
         catch (error) {
 
             console.error(
@@ -337,6 +343,7 @@ async function createMotionVideo(
             const image =
                 new Image();
 
+
             image.onload =
                 function () {
 
@@ -347,14 +354,20 @@ async function createMotionVideo(
                     let width = 1280;
                     let height = 720;
 
+
                     if (size === "portrait") {
+
                         width = 720;
                         height = 1280;
+
                     }
 
+
                     if (size === "square") {
+
                         width = 720;
                         height = 720;
+
                     }
 
 
@@ -366,6 +379,7 @@ async function createMotionVideo(
                         document.createElement(
                             "canvas"
                         );
+
 
                     canvas.width =
                         width;
@@ -391,6 +405,7 @@ async function createMotionVideo(
                     // ------------------------------
 
                     let recorder;
+
 
                     try {
 
@@ -418,10 +433,17 @@ async function createMotionVideo(
                     const chunks = [];
 
 
+                    // ------------------------------
+                    // COLLECT VIDEO DATA
+                    // ------------------------------
+
                     recorder.ondataavailable =
                         function (event) {
 
-                            if (event.data.size > 0) {
+                            if (
+                                event.data &&
+                                event.data.size > 0
+                            ) {
 
                                 chunks.push(
                                     event.data
@@ -431,6 +453,10 @@ async function createMotionVideo(
 
                         };
 
+
+                    // ------------------------------
+                    // VIDEO FINISHED
+                    // ------------------------------
 
                     recorder.onstop =
                         function () {
@@ -444,15 +470,25 @@ async function createMotionVideo(
                                     }
                                 );
 
+
                             resolve(blob);
 
                         };
 
 
+                    // ------------------------------
+                    // RECORDER ERROR
+                    // ------------------------------
+
                     recorder.onerror =
                         function (event) {
 
-                            reject(event.error);
+                            reject(
+                                event.error ||
+                                new Error(
+                                    "Video recording failed."
+                                )
+                            );
 
                         };
 
@@ -464,21 +500,44 @@ async function createMotionVideo(
                     recorder.start();
 
 
-                    const fps = 30;
+                    // IMPORTANT:
+                    // Use real elapsed time instead of
+                    // counting animation frames.
+                    //
+                    // This prevents a 10-second video
+                    // from accidentally becoming 5 seconds.
 
-                    const totalFrames =
-                        seconds * fps;
-
-                    let frame = 0;
+                    const startTime =
+                        performance.now();
 
 
                     // ------------------------------
                     // ANIMATION
                     // ------------------------------
 
-                    function animate() {
+                    function animate(currentTime) {
 
-                        if (frame >= totalFrames) {
+                        const elapsed =
+                            currentTime -
+                            startTime;
+
+
+                        const progress =
+                            Math.min(
+                                elapsed /
+                                (seconds * 1000),
+                                1
+                            );
+
+
+                        // --------------------------
+                        // STOP AT REQUESTED TIME
+                        // --------------------------
+
+                        if (progress >= 1) {
+
+                            // Draw one final frame
+                            drawFrame(1);
 
                             recorder.stop();
 
@@ -487,10 +546,27 @@ async function createMotionVideo(
                         }
 
 
-                        const progress =
-                            frame /
-                            totalFrames;
+                        // --------------------------
+                        // DRAW CURRENT FRAME
+                        // --------------------------
 
+                        drawFrame(progress);
+
+
+                        // Continue animation
+
+                        requestAnimationFrame(
+                            animate
+                        );
+
+                    }
+
+
+                    // ------------------------------
+                    // DRAW FRAME
+                    // ------------------------------
+
+                    function drawFrame(progress) {
 
                         // Gentle cinematic zoom
 
@@ -524,12 +600,13 @@ async function createMotionVideo(
 
 
                         // --------------------------
-                        // CALCULATE IMAGE SIZE
+                        // IMAGE RATIO
                         // --------------------------
 
                         const imageRatio =
                             image.width /
                             image.height;
+
 
                         const canvasRatio =
                             width /
@@ -539,6 +616,10 @@ async function createMotionVideo(
                         let drawWidth;
                         let drawHeight;
 
+
+                        // --------------------------
+                        // CALCULATE IMAGE SIZE
+                        // --------------------------
 
                         if (
                             imageRatio >
@@ -578,6 +659,7 @@ async function createMotionVideo(
                                 2 +
                             moveX;
 
+
                         const y =
                             (height -
                                 drawHeight) /
@@ -596,21 +678,23 @@ async function createMotionVideo(
                             drawHeight
                         );
 
-
-                        frame++;
-
-
-                        requestAnimationFrame(
-                            animate
-                        );
-
                     }
 
 
-                    animate();
+                    // ------------------------------
+                    // START ANIMATION
+                    // ------------------------------
+
+                    requestAnimationFrame(
+                        animate
+                    );
 
                 };
 
+
+            // ------------------------------
+            // IMAGE LOAD ERROR
+            // ------------------------------
 
             image.onerror =
                 function () {
@@ -623,6 +707,10 @@ async function createMotionVideo(
 
                 };
 
+
+            // ------------------------------
+            // LOAD IMAGE
+            // ------------------------------
 
             image.src =
                 imageSrc;
@@ -653,6 +741,7 @@ inspirationButtons.forEach(
                 const text =
                     button.textContent;
 
+
                 const cleanText =
                     text
                         .replace(
@@ -661,8 +750,10 @@ inspirationButtons.forEach(
                         )
                         .trim();
 
+
                 videoPrompt.value =
                     cleanText;
+
 
                 videoPrompt.focus();
 
@@ -684,9 +775,12 @@ function escapeHTML(text) {
             "div"
         );
 
+
     div.textContent =
         text;
+
 
     return div.innerHTML;
 
 }
+```
